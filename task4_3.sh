@@ -24,14 +24,15 @@ function date_to_int {
     DATEINT=`date -d "1970-01-01 $1" +%s`
 }
 function read_date_time_level_type_length_url_status_response_from_p {
-    date=$(echo $p | cut -f1 -d ' ')
-    time=$(echo $p | cut -f2 -d ' ')
-    level=$(echo $p | cut -f3 -d ' ')
-    type=$(echo $p | cut -f4 -d ' ')
-    length=$(echo $p | cut -f5 -d ' ')
-    url=$(echo $p | cut -f6 -d ' ')
-    status=$(echo $p | cut -f7 -d ' ')
-    response_time=$(echo $p | cut -f8 -d ' ' | cut -d '.' -f 1)
+    IFS=' ' read -a array <<< "$p"
+    date=${array[0]}
+    time=${array[1]}
+    level=${array[2]}
+    type=${array[3]}
+    length=${array[4]}
+    url=${array[5]}
+    status=${array[6]}
+    response_time=$(echo "${array[7]}" | cut -d '.' -f 1)
 }
 function count_quantile {
     # array persentage
@@ -58,7 +59,7 @@ function count_stats {
     IFS=';' read -a urls_array <<< "$URLS"
     for element in "${urls_array[@]}"
     do
-        regex1="^$element\?.*"
+        regex1="^$element[\?]"
         regex2="^$element$"
         full_count=0
         response_array=()

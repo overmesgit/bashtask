@@ -30,17 +30,18 @@ function count_quantile {
     quantile="${sorted_response_array[$persentage_count]}"
 }
 function read_date_time_level_type_length_url_status_response_from_p {
-    date=$(echo $p | cut -f1 -d ' ')
-    time=$(echo $p | cut -f2 -d ' ')
-    level=$(echo $p | cut -f3 -d ' ')
-    type=$(echo $p | cut -f4 -d ' ')
-    length=$(echo $p | cut -f5 -d ' ')
-    url=$(echo $p | cut -f6 -d ' ')
-    status=$(echo $p | cut -f7 -d ' ')
-    response_time=$(echo $p | cut -f8 -d ' ' | cut -d '.' -f 1)
+    IFS=' ' read -a array <<< "$p"
+    date=${array[0]}
+    time=${array[1]}
+    level=${array[2]}
+    type=${array[3]}
+    length=${array[4]}
+    url=${array[5]}
+    status=${array[6]}
+    response_time=$(echo "${array[7]}" | cut -d '.' -f 1)
 }
 function count_stats {
-    regex="^/resume?.*id=$ID.*"
+    regex="^/resume[\?].*id=$ID.*"
 
     response_time_sum=0
     full_count=0
@@ -57,12 +58,17 @@ function count_stats {
     done <$1
 
     echo "Statistic for profile with id=$ID for date $DATE"
-    echo "Average response time:"
-    echo $(($response_time_sum / $full_count))
+    if [ $full_count -gt 0 ];
+    then
+        echo "Average response time:"
+        echo $(($response_time_sum / $full_count))
 
-    count_quantile response_array[@] 50
-    echo "Median:"
-    echo $quantile
+        count_quantile response_array[@] 50
+        echo "Median:"
+        echo $quantile
+    else
+        echo "data not found"
+    fi
 }
 
 

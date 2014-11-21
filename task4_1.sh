@@ -26,14 +26,15 @@ function date_to_int {
     DATEINT=`date -d "1970-01-01 $1" +%s`
 }
 function read_date_time_level_type_length_url_status_response_from_p {
-    date=$(echo $p | cut -f1 -d ' ')
-    time=$(echo $p | cut -f2 -d ' ')
-    level=$(echo $p | cut -f3 -d ' ')
-    type=$(echo $p | cut -f4 -d ' ')
-    length=$(echo $p | cut -f5 -d ' ')
-    url=$(echo $p | cut -f6 -d ' ')
-    status=$(echo $p | cut -f7 -d ' ')
-    response_time=$(echo $p | cut -f8 -d ' ' | cut -d '.' -f 1)
+    IFS=' ' read -a array <<< "$p"
+    date=${array[0]}
+    time=${array[1]}
+    level=${array[2]}
+    type=${array[3]}
+    length=${array[4]}
+    url=${array[5]}
+    status=${array[6]}
+    response_time=$(echo "${array[7]}" | cut -d '.' -f 1)
 }
 function count_quantile {
     # array persentage
@@ -49,7 +50,7 @@ function count_stats {
     time_from=$DATEINT
     date_to_int $TIMETO
     time_to=$DATEINT
-    regex1="^$URL\?.*"
+    regex1="^$URL[\?]"
     regex2="^$URL$"
 
     success_count=0
@@ -78,19 +79,24 @@ function count_stats {
     done <$1
 
     echo "Statistic for $URL from $TIMEFROM to $TIMETO"
-    echo "Success requests for $URL:"
-    echo $success_count
+    if [ $full_count -gt 0 ];
+    then
+        echo "Success requests for $URL:"
+        echo $success_count
 
-    echo "Average response time:"
-    echo $(($response_time_sum / $full_count))
+        echo "Average response time:"
+        echo $(($response_time_sum / $full_count))
 
-    count_quantile response_array[@] 95
-    echo "95% quantile:"
-    echo $quantile
+        count_quantile response_array[@] 95
+        echo "95% quantile:"
+        echo $quantile
 
-    count_quantile response_array[@] 99
-    echo "99% quantile:"
-    echo $quantile
+        count_quantile response_array[@] 99
+        echo "99% quantile:"
+        echo $quantile
+    else
+        echo "data not found"
+    fi
 }
 
 
